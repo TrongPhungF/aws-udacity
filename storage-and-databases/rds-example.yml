@@ -1,0 +1,73 @@
+Parameters:
+
+  ProjectName:
+    Description: An environment name that will be prefixed to resource names
+    Type: String
+
+  ExampleName:
+    Description: Name for this example resources
+    Type: String
+    Default: udacity-rds-phunghuynh
+
+  RdsMasterUsername:
+    Type: String
+    Description: Username for the RDS database
+
+  RdsMasterPassword:
+    Type: String
+    Description: Password for the RDS database
+
+Resources:
+
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Ref ExampleName
+      GroupDescription: DB Security group for RDS example
+      VpcId:
+        Fn::ImportValue:
+          !Sub "${ProjectName}-VPC-ID"
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          CidrIp: 10.10.0.0/24
+
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupName: !Ref ExampleName
+      DBSubnetGroupDescription: DB subnet group for RDS example
+      SubnetIds: !Split
+        - ","
+        - Fn::ImportValue:
+            !Sub "${ProjectName}-Private-Subnets"
+
+  DBParameterGroup:
+    Type: AWS::RDS::DBParameterGroup
+    Properties:
+      DBParameterGroupName: !Ref ExampleName
+      Description: Custom parameter group for RDS example
+      Family: postgres15
+      Parameters:
+        synchronous_commit: 'off'
+        rds.force_ssl: 1
+
+  DBInstance:
+    Type: AWS::RDS::DBInstance
+    DeletionPolicy: Snapshot
+    Properties:
+      AllocatedStorage: '20'
+      AllowMajorVersionUpgrade: false
+      AutoMinorVersionUpgrade: true
+      DBName: phunghuynhdb
+      DBInstanceClass: db.t3.micro
+      DBInstanceIdentifier: !Ref ExampleName
+      VPCSecurityGroups:
+        - !Ref SecurityGroup
+      Engine: postgres
+      EngineVersion: "15.2"
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      DBParameterGroupName: !Ref DBParameterGroup
+      MasterUsername: !Ref RdsMasterUsername
+      MasterUserPassword: !Ref RdsMasterPassword

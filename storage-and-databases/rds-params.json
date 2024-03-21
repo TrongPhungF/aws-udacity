@@ -1,0 +1,14 @@
+[
+    {
+        "ParameterKey": "ProjectName",
+        "ParameterValue": "Udacity-Project-Phung-Huynh"
+    },
+    {
+        "ParameterKey": "RdsMasterUsername",
+        "ParameterValue": "UsernamePhungHuynh"
+    },
+    {
+        "ParameterKey": "RdsMasterPassword",
+        "ParameterValue": "PasswordPhungHuynh"
+    }
+]
