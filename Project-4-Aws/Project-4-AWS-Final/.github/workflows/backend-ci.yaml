@@ -1,0 +1,104 @@
+name: ci-backend-workflow
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v3
+        with:
+          node-version: ${{vars.PYTHON_VERSION}}
+
+      - name: Cache pipenv virtual environment
+        uses: actions/cache@v3
+        with:
+          path: ~/.local/share/virtualenvs
+          key: ${{ runner.os }}-pipenv-${{ hashFiles('**/Pipfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pipenv-
+
+      - name: Install pipenv
+        run: pip install pipenv
+        working-directory: ${{vars.WORKING_DIRECTORY_BE}}
+
+      - name: Install dependencies
+        run: pipenv install --dev
+        working-directory: ${{vars.WORKING_DIRECTORY_BE}}
+
+      - name: Run the lint
+        run: pipenv run lint
+        working-directory: ${{vars.WORKING_DIRECTORY_BE}}
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v3
+        with:
+          node-version: ${{vars.PYTHON_VERSION}}
+
+      - name: Cache pipenv virtual environment
+        uses: actions/cache@v3
+        with:
+          path: ~/.local/share/virtualenvs
+          key: ${{ runner.os }}-pipenv-${{ hashFiles('**/Pipfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pipenv-
+
+      - name: Install pipenv
+        run: pip install pipenv
+        working-directory: ${{vars.WORKING_DIRECTORY_BE}}
+
+      - name: Install dependencies
+        run: pipenv install --dev
+        working-directory: ${{vars.WORKING_DIRECTORY_BE}}
+
+      - name: Run tests
+        run: pipenv run test
+        working-directory: ${{vars.WORKING_DIRECTORY_BE}}
+
+  build:
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-python@v3
+        with:
+          node-version: ${{vars.PYTHON_VERSION}}
+
+      - name: Cache pipenv virtual environment
+        uses: actions/cache@v3
+        with:
+          path: ~/.local/share/virtualenvs
+          key: ${{ runner.os }}-pipenv-${{ hashFiles('**/Pipfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pipenv-
+
+      - name: Install pipenv
+        run: pip install pipenv
+        working-directory: ${{vars.WORKING_DIRECTORY_BE}}
+
+      - name: Install dependencies
+        run: pipenv install --dev
+        working-directory: ${{vars.WORKING_DIRECTORY_BE}}
+
+      - name: Run tests
+        run: pipenv run test
+        working-directory: ${{vars.WORKING_DIRECTORY_BE}}
